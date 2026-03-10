@@ -3,9 +3,15 @@ import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 // Store table
 export const stores = pgTable("stores", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name"),
+
+  ownerId: uuid("owner_id").notNull(),
+
+  name: text("name").notNull(),
+
   description: text("description"),
+
   isActive: boolean("is_active").notNull().default(true),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
@@ -24,3 +30,5 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
+
+
