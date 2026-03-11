@@ -1,0 +1,41 @@
+type Product = {
+  id: string
+  name: string
+  description: string
+  price: number
+}
+
+export default function ProductCard({ product }: { product: Product }) {
+  return (
+    <div className="
+      border
+      rounded-xl
+      overflow-hidden
+      hover:shadow-md
+      transition
+      bg-white
+    ">
+
+      <div className="bg-gray-100 h-48 flex items-center justify-center text-gray-400 text-sm">
+        No Image
+      </div>
+
+      <div className="p-4">
+
+        <h2 className="font-semibold text-sm">
+          {product.name}
+        </h2>
+
+        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+          {product.description}
+        </p>
+
+        <p className="font-bold mt-2">
+          Rp {product.price}
+        </p>
+
+      </div>
+
+    </div>
+  )
+}

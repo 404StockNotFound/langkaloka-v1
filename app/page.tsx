@@ -1,9 +1,45 @@
+"use client"
+
 import { Header } from "@/components/views/Header"
+import { useProducts } from "@/hooks/useProducts"
+import ProductCard from "@/components/products/ProductCard"
 
 export default function Home() {
+  const { data: products, isLoading } = useProducts()
+
   return (
-    <main className="flex flex-col h-screen">
+    <main className="flex flex-col min-h-screen">
+
       <Header />
+
+      <div className="max-w-7xl mx-auto w-full p-6">
+
+        <h1 className="text-2xl font-bold mb-6">
+          Marketplace
+        </h1>
+
+        {isLoading && <p>Loading products...</p>}
+
+        <div className="
+          grid
+          grid-cols-1
+          sm:grid-cols-2
+          md:grid-cols-3
+          lg:grid-cols-4
+          gap-6
+        ">
+
+          {products?.map((product: any) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+            />
+          ))}
+
+        </div>
+
+      </div>
+
     </main>
   )
 }
