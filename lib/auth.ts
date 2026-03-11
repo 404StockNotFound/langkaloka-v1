@@ -1,8 +1,13 @@
 import jwt from "jsonwebtoken"
 
-export function verifyToken(token: string) {
+export interface JwtPayload {
+  id: string
+  email: string
+}
+
+export function verifyToken(token: string): JwtPayload | null {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET!)
+    return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload
   } catch {
     return null
   }

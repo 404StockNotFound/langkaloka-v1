@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/db/client"
 import { stores } from "@/db/schema"
-import jwt from "jsonwebtoken"
+import { verifyToken } from "@/lib/auth"
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,15 +17,17 @@ export async function POST(req: NextRequest) {
 
     const token = authHeader.split(" ")[1]
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string
-    }
+    const decoded = verifyToken(token)
+
+if (!decoded) {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+}
 
     const [store] = await db.insert(stores).values({
-      name,
-      description,
-      ownerId: decoded.id,
-    }).returning()
+  name,
+  description,
+  ownerId: decoded.id,
+}).returning()
 
     return NextResponse.json(store)
 

@@ -13,7 +13,6 @@ interface LoginResponse {
     email: string
     name: string
     phone: string
-    storeId: string | null
   }
 }
 
