@@ -8,13 +8,14 @@ import { db } from "@/db/client"
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { email, name, phone, password, address, storeId } = body
+
+    const { email, name, phone, password, address } = body
 
     // Validate required fields
     if (!email || !phone || !password) {
       return NextResponse.json(
         { error: "Email, phone and password are required" },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -27,13 +28,14 @@ export async function POST(req: NextRequest) {
 
     if (existing.length > 0) {
       const isDuplicateEmail = existing[0].email === email
+
       return NextResponse.json(
         {
           error: isDuplicateEmail
             ? "Email already exists"
             : "Phone already exists",
         },
-        { status: 409 },
+        { status: 409 }
       )
     }
 
@@ -49,7 +51,6 @@ export async function POST(req: NextRequest) {
         phone,
         password: hashedPassword,
         address: address ?? null,
-        storeId: storeId ?? null,
       })
       .returning()
 
@@ -58,10 +59,9 @@ export async function POST(req: NextRequest) {
       {
         id: newUser.id,
         email: newUser.email,
-        storeId: newUser.storeId,
       },
       process.env.JWT_SECRET!,
-      { expiresIn: "1d" },
+      { expiresIn: "1d" }
     )
 
     return NextResponse.json(
@@ -74,16 +74,16 @@ export async function POST(req: NextRequest) {
           name: newUser.name,
           phone: newUser.phone,
           address: newUser.address,
-          storeId: newUser.storeId,
         },
       },
-      { status: 201 },
+      { status: 201 }
     )
   } catch (error) {
     console.error("[REGISTER ERROR]", error)
+
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
