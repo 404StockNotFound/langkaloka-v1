@@ -18,22 +18,20 @@ export default function SellPage() {
 
       const token = localStorage.getItem("token")
 
-      await axios.post(
-        "/api/products/create",
-        {
-          name,
-          description,
-          price: Number(price),
-          condition,
-          storeId: null,
-          categoryId: null
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
+    await axios.post(
+  "/api/products/create",
+  {
+    name,
+    description,
+    price: Number(price),
+    condition
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+)
 
       alert("Product created!")
 
@@ -49,51 +47,66 @@ export default function SellPage() {
 
       <Header />
 
-      <div className="max-w-xl mx-auto p-6">
+    <div className="max-w-xl mx-auto p-6 pb-24">
 
-        <h1 className="text-2xl font-bold mb-6">
-          Jual Barang
-        </h1>
+  <h1 className="text-2xl font-bold mb-6">
+    Jual Barang
+  </h1>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+  <form
+    onSubmit={handleSubmit}
+    className="flex flex-col gap-4 mt-4"
+  >
 
-          <input
-            placeholder="Nama barang"
-            className="border p-3 rounded"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+    <input
+      className="border p-3 rounded-lg"
+      placeholder="Nama barang"
+      value={name}
+      onChange={(e)=>setName(e.target.value)}
+    />
 
-          <input
-            placeholder="Harga"
-            className="border p-3 rounded"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-          />
+    <input
+      className="border p-3 rounded-lg"
+      placeholder="Harga"
+      value={price}
+      onChange={(e)=>setPrice(e.target.value)}
+    />
 
-          <textarea
-            placeholder="Deskripsi"
-            className="border p-3 rounded"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
+    <textarea
+      className="border p-3 rounded-lg"
+      placeholder="Deskripsi"
+      value={description}
+      onChange={(e)=>setDescription(e.target.value)}
+    />
 
-          <select
-            className="border p-3 rounded"
-            value={condition}
-            onChange={(e) => setCondition(e.target.value)}
-          >
-            <option value="new">New</option>
-            <option value="used">Used</option>
-          </select>
+    <select
+      className="border p-3 rounded-lg"
+      value={condition}
+      onChange={(e)=>setCondition(e.target.value)}
+    >
+      <option value="new">New</option>
+      <option value="used">Used</option>
+    </select>
 
-          <button className="bg-black text-white p-3 rounded">
-            Publish
-          </button>
+    <button
+      type="submit"
+      className="
+        bg-black
+        text-red
+        py-3
+        rounded-lg
+        mt-4
+        hover:bg-red-800
+        transition
+      "
+    >
+      Publish Product
+    </button>
 
-        </form>
+  </form>
 
-      </div>
+</div>
+
 
     </main>
   )

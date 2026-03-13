@@ -13,7 +13,7 @@ export const useCreateStore = () => {
       const token = localStorage.getItem("token")
 
       const { data } = await axios.post(
-        "/api/store/create",
+        "/api/stores/create",
         payload,
         {
           headers: {
@@ -23,7 +23,7 @@ export const useCreateStore = () => {
       )
 
       return data
-    },
+    }
 
   })
 

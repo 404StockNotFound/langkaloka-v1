@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 
 type Product = {
@@ -5,28 +7,30 @@ type Product = {
   name: string
   description: string
   price: number
+  condition?: string
 }
 
 export default function ProductCard({ product }: { product: Product }) {
+
   return (
     <Link href={`/product/${product.id}`}>
 
-      <div className="
-        bg-white
-        border
-        rounded-xl
-        overflow-hidden
-        hover:shadow-lg
-        transition
-        cursor-pointer
-        flex
-        flex-col
-      ">
+<div className="
+  border
+  rounded-xl
+  overflow-hidden
+  hover:shadow-lg
+  hover:-translate-y-1
+  transition-all
+  duration-200
+  bg-white
+  cursor-pointer
+">
 
         {/* IMAGE */}
         <div className="
           bg-gray-100
-          h-48
+          aspect-square
           flex
           items-center
           justify-center
@@ -37,31 +41,21 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
 
         {/* CONTENT */}
-        <div className="p-4 flex flex-col gap-2">
+        <div className="p-3 flex flex-col gap-1">
 
-          <h2 className="
-            font-semibold
-            text-sm
-            line-clamp-1
-          ">
+          <h2 className="text-sm font-medium line-clamp-1">
             {product.name}
           </h2>
 
-          <p className="
-            text-xs
-            text-gray-500
-            line-clamp-2
-          ">
-            {product.description}
+          <p className="text-base font-bold">
+            Rp {product.price.toLocaleString()}
           </p>
 
-          <p className="
-            font-bold
-            text-base
-            mt-1
-          ">
-            Rp {product.price}
-          </p>
+          {product.condition && (
+            <p className="text-xs text-gray-500">
+              {product.condition}
+            </p>
+          )}
 
         </div>
 
