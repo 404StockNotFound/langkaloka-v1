@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import axios from "axios"
 
 type Product = {
   id: string
@@ -13,11 +14,45 @@ type Product = {
 
 export default function ProductCard({ product }: { product: Product }) {
 
+  const addFavorite = async (e: React.MouseEvent) => {
+
+    e.preventDefault()
+
+    const token = localStorage.getItem("token")
+
+    if (!token) {
+      alert("Login dulu")
+      return
+    }
+
+    try {
+
+      await axios.post(
+        "/api/favorites",
+        { productId: product.id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      alert("Added to wishlist ❤️")
+
+    } catch (error) {
+
+      console.error(error)
+
+    }
+
+  }
+
   return (
     <Link href={`/product/${product.id}`}>
 
       <div
         className="
+        relative
         border
         rounded-xl
         overflow-hidden
@@ -29,6 +64,24 @@ export default function ProductCard({ product }: { product: Product }) {
         cursor-pointer
       "
       >
+
+        {/* FAVORITE BUTTON */}
+        <button
+          onClick={addFavorite}
+          className="
+            absolute
+            top-2
+            right-2
+            bg-white
+            rounded-full
+            p-2
+            shadow
+            hover:scale-110
+            transition
+          "
+        >
+          ❤️
+        </button>
 
         {/* IMAGE */}
         {product.image ? (

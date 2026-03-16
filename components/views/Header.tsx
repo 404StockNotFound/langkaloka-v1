@@ -34,41 +34,49 @@ justify-between
 
         {/* Logo */}
         <span className="font-bold text-xl">LangkaLoka</span>
+{/* Right side */}
+<div className="flex items-center gap-4">
 
-        {/* Right side */}
-        <div className="flex items-center gap-4">
+  {/* Sell button */}
+  {user && (
+    <Link href="/sell">
+      <Button>Jualan Yuk!</Button>
+    </Link>
+  )}
 
-          {/* Sell button */}
-          {user && (
-            <Link href="/sell">
-              <Button>Jualan Yuk!</Button>
-            </Link>
-          )}
+  {/* Wishlist */}
+  {user && (
+    <Link href="/wishlist">
+      <Button variant="outline">
+        ❤️ Wishlist
+      </Button>
+    </Link>
+  )}
 
-          {/* Login Dialog */}
-          <Dialog>
+  {/* Login Dialog */}
+  <Dialog>
 
-            <DialogTrigger asChild>
-              {user ? (
-                <div className="flex items-center gap-3">
-                  <span className="font-medium">
-                    Hi {user.email}
-                  </span>
+    <DialogTrigger asChild>
+      {user ? (
+        <div className="flex items-center gap-3">
+          <span className="font-medium">
+            Hi {user.email}
+          </span>
 
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      localStorage.removeItem("token")
-                      window.location.reload()
-                    }}
-                  >
-                    Logout
-                  </Button>
-                </div>
-              ) : (
-                <Button>Login</Button>
-              )}
-            </DialogTrigger>
+         <Button
+  variant="outline"
+  onClick={() => {
+    localStorage.removeItem("token")
+    window.location.href = "/"
+  }}
+>
+  Logout
+</Button>
+        </div>
+      ) : (
+        <Button>Login</Button>
+      )}
+    </DialogTrigger>
 
             <DialogContent className="sm:max-w-md">
 
