@@ -2,12 +2,29 @@
 
 import { Header } from "@/components/views/Header"
 import { useFavorites } from "@/hooks/useFavorites"
+import axios from "axios"
+
 
 export default function WishlistPage() {
 
   const { data: favorites, isLoading } = useFavorites()
 
   if (isLoading) return <p>Loading...</p>
+const removeFavorite = async (productId: string) => {
+
+  const token = localStorage.getItem("token")
+
+  if (!token) return
+
+  await axios.delete(`/api/favorites/${productId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  // refresh page
+  window.location.reload()
+}
 
   return (
     <main className="min-h-screen">
@@ -44,17 +61,25 @@ export default function WishlistPage() {
 
               )}
 
-              <div className="p-3">
+        <div className="p-3">
 
-                <p className="text-sm font-medium">
-                  {fav.name}
-                </p>
+  <p className="text-sm font-medium">
+    {fav.name}
+  </p>
 
-                <p className="font-bold">
-                  Rp {fav.price?.toLocaleString()}
-                </p>
+  <p className="font-bold">
+    Rp {fav.price?.toLocaleString()}
+  </p>
 
-              </div>
+  {/* REMOVE BUTTON */}
+  <button
+    onClick={() => removeFavorite(fav.productId)}
+    className="mt-2 text-sm text-red-500 hover:underline"
+  >
+    Remove
+  </button>
+
+</div>
 
             </div>
 

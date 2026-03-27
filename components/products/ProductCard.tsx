@@ -14,39 +14,50 @@ type Product = {
 
 export default function ProductCard({ product }: { product: Product }) {
 
-  const addFavorite = async (e: React.MouseEvent) => {
+ const toggleFavorite = async (e: React.MouseEvent) => {
 
-    e.preventDefault()
+  e.preventDefault()
 
-    const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token")
 
-    if (!token) {
-      alert("Login dulu")
-      return
-    }
+  if (!token) {
+    alert("Login dulu")
+    return
+  }
 
-    try {
+  try {
 
-      await axios.post(
-        "/api/favorites",
-        { productId: product.id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+    await axios.post(
+      "/api/favorites",
+      { productId: product.id },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      )
+      }
+    )
 
-      alert("Added to wishlist ❤️")
+    alert("Added ❤️")
 
-    } catch (error) {
+  } catch (error: any) {
 
+    // kalau sudah ada → kita remove
+    if (error?.response?.data?.message === "Already in favorites") {
+
+      await axios.delete(`/api/favorites/${product.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      alert("Removed ❌")
+
+    } else {
       console.error(error)
-
     }
 
   }
-
+}
   return (
     <Link href={`/product/${product.id}`}>
 
@@ -66,22 +77,22 @@ export default function ProductCard({ product }: { product: Product }) {
       >
 
         {/* FAVORITE BUTTON */}
-        <button
-          onClick={addFavorite}
-          className="
-            absolute
-            top-2
-            right-2
-            bg-white
-            rounded-full
-            p-2
-            shadow
-            hover:scale-110
-            transition
-          "
-        >
-          ❤️
-        </button>
+       <button
+  onClick={toggleFavorite}
+  className="
+    absolute
+    top-2
+    right-2
+    bg-white
+    rounded-full
+    p-2
+    shadow
+    hover:scale-110
+    transition
+  "
+>
+  ❤️
+</button>
 
         {/* IMAGE */}
         {product.image ? (
