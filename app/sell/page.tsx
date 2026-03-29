@@ -3,6 +3,7 @@
 import { Header } from "@/components/views/Header"
 import { useState } from "react"
 import axios from "axios"
+import { useEffect } from "react"
 
 export default function SellPage() {
 
@@ -66,6 +67,37 @@ export default function SellPage() {
   }
 
 }
+
+
+useEffect(() => {
+
+  const checkStore = async () => {
+
+    const token = localStorage.getItem("token")
+
+    if (!token) return
+
+    try {
+
+      const res = await axios.get("/api/stores/me", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (!res.data) {
+        window.location.href = "/store/create"
+      }
+
+    } catch {
+      window.location.href = "/store/create"
+    }
+
+  }
+
+  checkStore()
+
+}, [])
 
   return (
     <main className="min-h-screen">

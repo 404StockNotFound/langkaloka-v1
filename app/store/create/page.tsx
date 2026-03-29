@@ -17,11 +17,23 @@ export default function CreateStorePage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!name) {
+      alert("Nama toko wajib diisi")
+      return
+    }
+
     mutate(
       { name, description },
       {
         onSuccess: () => {
+          alert("Store berhasil dibuat 🎉")
           router.push("/sell")
+        },
+        onError: (error: any) => {
+          alert(
+            error?.response?.data?.error ||
+            "Gagal membuat toko"
+          )
         }
       }
     )
@@ -58,7 +70,7 @@ export default function CreateStorePage() {
           />
 
           <button
-            className="bg-black text-white py-3 rounded"
+            className="bg-black text-white py-3 rounded disabled:opacity-50"
             disabled={isPending}
           >
             {isPending ? "Creating..." : "Create Store"}
