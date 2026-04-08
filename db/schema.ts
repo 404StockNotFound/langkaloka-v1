@@ -85,3 +85,29 @@ export const favorites = pgTable("favorites", {
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
 })
+
+// CHATS
+export const chats = pgTable("chats", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  productId: uuid("product_id").notNull(),
+
+  buyerId: uuid("buyer_id").notNull(),
+
+  sellerId: uuid("seller_id").notNull(),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+// MESSAGES
+export const messages = pgTable("messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  chatId: uuid("chat_id").notNull(),
+
+  senderId: uuid("sender_id").notNull(),
+
+  text: text("text").notNull(),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+})
