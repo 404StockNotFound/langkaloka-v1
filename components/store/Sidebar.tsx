@@ -5,10 +5,16 @@ import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   Package,
-  PlusCircle
+  PlusCircle,
+  Settings
 } from "lucide-react"
 
 const menus = [
+    {
+  name: "Setting Toko",
+  href: "/store-panel/settings",
+  icon: Settings
+},
   {
     name: "Dashboard",
     href: "/store-panel",
