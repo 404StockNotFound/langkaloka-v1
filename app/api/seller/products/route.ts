@@ -6,7 +6,6 @@ import { verifyToken } from "@/lib/auth"
 
 export async function GET(req: NextRequest) {
   try {
-
     const authHeader = req.headers.get("authorization")
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -28,7 +27,7 @@ export async function GET(req: NextRequest) {
       .limit(1)
 
     if (!store.length) {
-      return NextResponse.json({ error: "Store not found" }, { status: 404 })
+      return NextResponse.json(null)
     }
 
     // 🔥 ambil produk
@@ -38,14 +37,13 @@ export async function GET(req: NextRequest) {
         name: products.name,
         price: products.price,
         isSold: products.isSold,
-        image: productImages.url
+        image: productImages.url,
       })
       .from(products)
       .leftJoin(productImages, eq(products.id, productImages.productId))
       .where(eq(products.storeId, store[0].id))
 
     return NextResponse.json(sellerProducts)
-
   } catch (error) {
     console.error(error)
     return NextResponse.json(

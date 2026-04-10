@@ -1,5 +1,6 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
+import { toast } from "sonner"
 
 interface LoginPayload {
   email: string
@@ -16,10 +17,10 @@ interface LoginResponse {
   }
 }
 
-export const useLogin = () => {
-  const loginUser = async (
-    payload: LoginPayload,
-  ): Promise<LoginResponse> => {
+export const useLogin = ({ onSuccess }: { onSuccess?: () => void }) => {
+  const queryClient = useQueryClient()
+
+  const loginUser = async (payload: LoginPayload): Promise<LoginResponse> => {
     const { data } = await axios.post("/api/auth/login", payload)
     return data
   }
@@ -27,16 +28,19 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: loginUser,
 
-  onSuccess: (data) => {
+    onSuccess: (data) => {
       localStorage.setItem("token", data.token)
       localStorage.setItem("userId", data.user.id)
 
       // reload supaya header update
-      window.location.reload()
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] })
+      onSuccess?.()
     },
 
-    onError: (error) => {
-      console.error("Login failed:", error)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      const message = error?.response?.data?.error || "Login gagal"
+      toast.error(message)
     },
   })
 }

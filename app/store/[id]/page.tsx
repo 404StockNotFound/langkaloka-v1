@@ -7,7 +7,6 @@ import ProductCard from "@/components/products/ProductCard"
 import { useState, useEffect } from "react"
 
 export default function StorePage() {
-
   const params = useParams()
   const id = params.id as string
 
@@ -30,7 +29,6 @@ export default function StorePage() {
 
   // 🔥 HANDLE RATE
   const handleRate = async (star: number) => {
-
     // 🔒 BLOCK kalau sudah rating
     if (hasRated) {
       alert("Kamu sudah memberi rating ⭐")
@@ -51,12 +49,12 @@ export default function StorePage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           storeId: data.store.id,
-          rating: star
-        })
+          rating: star,
+        }),
       })
 
       const result = await res.json()
@@ -74,7 +72,6 @@ export default function StorePage() {
       await refetch()
 
       alert(`⭐ Terima kasih sudah memberi ${star} bintang!`)
-
     } catch (error) {
       console.error(error)
       alert("Gagal rating")
@@ -85,14 +82,11 @@ export default function StorePage() {
 
   return (
     <main className="min-h-screen">
-
       <Header />
 
       <div className="max-w-6xl mx-auto p-6">
-
         {/* STORE INFO */}
         <div className="flex items-start gap-4 mb-8">
-
           {/* FOTO */}
           {data.store.image ? (
             <img
@@ -105,87 +99,50 @@ export default function StorePage() {
 
           {/* INFO */}
           <div>
-
-            <h1 className="text-3xl font-bold">
-              {data.store.name}
-            </h1>
+            <h1 className="text-3xl font-bold">{data.store.name}</h1>
 
             {/* ⭐ AVG */}
             <div className="mt-2">
+              {/* ⭐ AVG */}
+              <div className="flex items-center gap-2">
+                <p className="text-yellow-500 text-lg font-bold">
+                  ⭐ {Number(data.avgRating || 0).toFixed(1)}
+                </p>
+                <p className="text-sm text-gray-400">/ 5</p>
+              </div>
 
-  {/* ⭐ AVG */}
-  <div className="flex items-center gap-2">
-    <p className="text-yellow-500 text-lg font-bold">
-      ⭐ {Number(data.avgRating || 0).toFixed(1)}
-    </p>
-    <p className="text-sm text-gray-400">
-      / 5
-    </p>
-  </div>
+              {/* TOTAL */}
+              <p className="text-xs text-gray-400">
+                {data.totalRatings} penilaian
+              </p>
+            </div>
 
-  {/* TOTAL */}
-  <p className="text-xs text-gray-400">
-    {data.totalRatings} penilaian
-  </p>
-
-  {/* 🔥 BREAKDOWN */}
-  <div className="mt-3 w-64 flex flex-col gap-1">
-
-    {[5,4,3,2,1].map((star) => {
-
-      const percent = data.ratingPercentages?.[star] || 0
-
-      return (
-        <div key={star} className="flex items-center gap-2 text-xs">
-
-          {/* STAR */}
-          <span className="w-6 text-gray-600">
-            {star}⭐
-          </span>
-
-          {/* BAR */}
-          <div className="flex-1 bg-gray-200 h-2 rounded overflow-hidden">
-            <div
-              className="bg-yellow-400 h-2 transition-all"
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-
-          {/* PERCENT */}
-          <span className="w-10 text-right text-gray-500">
-            {percent.toFixed(0)}%
-          </span>
-
-        </div>
-      )
-    })}
-
-  </div>
-
-</div>
-
-            <p className="text-gray-500">
-              {data.store.description}
-            </p>
+            <p className="text-gray-500">{data.store.description}</p>
 
             {/* ⭐ RATING */}
-            <div className="flex gap-1 mt-3">
-
-              {[1,2,3,4,5].map((star) => (
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   disabled={loading || hasRated}
                   onClick={() => handleRate(star)}
                   className={`
                     text-2xl transition
-                    ${star <= selectedRating ? "text-yellow-500" : "text-gray-300"}
-                    ${hasRated ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
+                    ${
+                      star <= selectedRating
+                        ? "text-yellow-500"
+                        : "text-gray-300"
+                    }
+                    ${
+                      hasRated
+                        ? "cursor-not-allowed opacity-60"
+                        : "cursor-pointer"
+                    }
                   `}
                 >
                   ★
                 </button>
               ))}
-
             </div>
 
             {/* 🔥 STATUS */}
@@ -199,9 +156,7 @@ export default function StorePage() {
             <p className="text-sm text-gray-400 mt-2">
               📍 {data.store.location || "Lokasi belum diisi"}
             </p>
-
           </div>
-
         </div>
 
         {/* PRODUCTS */}
@@ -210,9 +165,7 @@ export default function StorePage() {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
-
       </div>
-
     </main>
   )
 }

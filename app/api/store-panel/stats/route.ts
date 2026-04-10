@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm"
 
 export async function GET(req: NextRequest) {
   try {
-
     const authHeader = req.headers.get("authorization")
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -27,8 +26,8 @@ export async function GET(req: NextRequest) {
       .where(eq(stores.ownerId, decoded.id))
       .limit(1)
 
-    if (!store.length) {
-      return NextResponse.json({ error: "Store not found" }, { status: 404 })
+    if (store.length < 1) {
+      return NextResponse.json([], { status: 200 })
     }
 
     const storeId = store[0].id
@@ -40,23 +39,20 @@ export async function GET(req: NextRequest) {
       .where(eq(products.storeId, storeId))
 
     const total = allProducts.length
-    const sold = allProducts.filter(p => p.isSold).length
-    const active = allProducts.filter(p => !p.isSold).length
+    const sold = allProducts.filter((p) => p.isSold).length
+    const active = allProducts.filter((p) => !p.isSold).length
 
     return NextResponse.json({
       total,
       sold,
-      active
+      active,
     })
-
   } catch (error) {
-
     console.error(error)
 
     return NextResponse.json(
       { error: "Failed to fetch stats" },
       { status: 500 }
     )
-
   }
 }

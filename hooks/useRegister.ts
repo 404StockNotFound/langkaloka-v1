@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
-import axios, { AxiosError } from "axios"
+import axios from "axios"
 
 export interface RegisterPayload {
   name: string
@@ -22,9 +22,10 @@ export interface RegisterResponse {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useRegister = (options?: any) => {
   const registerUser = async (
-    payload: RegisterPayload,
+    payload: RegisterPayload
   ): Promise<RegisterResponse> => {
     const { data } = await axios.post("/api/auth/register", payload)
     return data
@@ -34,7 +35,6 @@ export const useRegister = (options?: any) => {
     mutationFn: registerUser,
 
     onSuccess: (data) => {
-      localStorage.setItem("token", data.token)
       options?.onSuccess?.(data)
     },
 

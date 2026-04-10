@@ -5,53 +5,42 @@ import { eq } from "drizzle-orm"
 import { verifyToken } from "@/lib/auth"
 import { stores } from "@/db/schema"
 
-
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-
   try {
-
     const { id } = await context.params
 
     const product = await db
-  .select({
-    id: products.id,
-    storeId: products.storeId,
-    name: products.name,
-    description: products.description,
-    price: products.price,
-    condition: products.condition,
-    image: productImages.url,
-    isSold: products.isSold,
-    storeOwnerId: stores.ownerId, // 🔥 INI PENTING
-  })
-  .from(products)
-  .leftJoin(stores, eq(products.storeId, stores.id))
-  .leftJoin(productImages, eq(products.id, productImages.productId))
-  .where(eq(products.id, id))
-  .limit(1)
+      .select({
+        id: products.id,
+        storeId: products.storeId,
+        name: products.name,
+        description: products.description,
+        price: products.price,
+        condition: products.condition,
+        image: productImages.url,
+        isSold: products.isSold,
+        storeOwnerId: stores.ownerId, // 🔥 INI PENTING
+      })
+      .from(products)
+      .leftJoin(stores, eq(products.storeId, stores.id))
+      .leftJoin(productImages, eq(products.id, productImages.productId))
+      .where(eq(products.id, id))
+      .limit(1)
     if (!product.length) {
-
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      )
-
+      return NextResponse.json({ error: "Product not found" }, { status: 404 })
     }
 
     return NextResponse.json(product[0])
-
   } catch (error) {
-
     console.error(error)
 
     return NextResponse.json(
       { error: "Failed to fetch product" },
       { status: 500 }
     )
-
   }
 }
 
@@ -60,8 +49,10 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-
     const { id } = await context.params
+
+    const body = await req.json()
+    const { isSold } = body
 
     const authHeader = req.headers.get("authorization")
 
@@ -104,15 +95,10 @@ export async function PATCH(
     }
 
     // 🔥 update sold
-    await db
-      .update(products)
-      .set({ isSold: true })
-      .where(eq(products.id, id))
+    await db.update(products).set({ isSold }).where(eq(products.id, id))
 
     return NextResponse.json({ message: "Product marked as sold" })
-
   } catch (error) {
-
     console.error(error)
 
     return NextResponse.json(
@@ -127,7 +113,6 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-
     const { id } = await context.params
 
     const authHeader = req.headers.get("authorization")
@@ -171,14 +156,10 @@ export async function DELETE(
     }
 
     // 🔥 DELETE PRODUCT
-    await db
-      .delete(products)
-      .where(eq(products.id, id))
+    await db.delete(products).where(eq(products.id, id))
 
     return NextResponse.json({ message: "Product deleted" })
-
   } catch (error) {
-
     console.error(error)
 
     return NextResponse.json(

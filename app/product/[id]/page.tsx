@@ -1,14 +1,14 @@
 "use client"
 
 import { useCurrentUser } from "@/hooks/useCurrentUser"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useProduct } from "@/hooks/useProduct"
 import { Header } from "@/components/views/Header"
 import Link from "next/link"
 import axios from "axios"
 
 export default function ProductDetailPage() {
-
+  const router = useRouter()
   const params = useParams()
   const id = params.id as string
 
@@ -20,95 +20,89 @@ export default function ProductDetailPage() {
 
   if (!product) return <p>Product not found</p>
 
-const markAsSold = async () => {
+  const markAsSoldorUnsold = async (value: boolean) => {
+    const token = localStorage.getItem("token")
 
-  const token = localStorage.getItem("token")
+    if (!token) {
+      alert("Login dulu")
+      return
+    }
 
-  if (!token) {
-    alert("Login dulu")
-    return
-  }
-
-  try {
-
-    await axios.patch(`/api/products/${id}`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-
-    alert("Produk berhasil ditandai SOLD")
-
-    window.location.reload()
-
-  } catch (error) {
-    console.error(error)
-  }
-  
-}
-const handleChat = async () => {
-
-  const token = localStorage.getItem("token")
-
-  if (!token) {
-    alert("Login dulu")
-    return
-  }
-
-  try {
-
-    const res = await axios.post(
-      "/api/chat/create",
-      { productId: id },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+    try {
+      await axios.patch(
+        `/api/products/${id}`,
+        {
+          isSold: value,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      }
-    )
+      )
 
-    const chatId = res.data.id
+      alert(
+        value
+          ? "Produk berhasil ditandai SOLD"
+          : "Batalkan Tandai Terjual berhasil"
+      )
 
-    // 🔥 redirect ke halaman chat
-    window.location.href = `/chat/${chatId}`
-
-  } catch (error) {
-    console.error(error)
+      router.refresh()
+    } catch (error) {
+      console.error(error)
+    }
   }
+  const handleChat = async () => {
+    const token = localStorage.getItem("token")
 
-}
+    if (!token) {
+      alert("Login dulu")
+      return
+    }
 
+    try {
+      const res = await axios.post(
+        "/api/chat/create",
+        { productId: id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const chatId = res.data.id
+
+      // 🔥 redirect ke halaman chat
+      router.push(`/chat/${chatId}`)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   return (
     <main className="min-h-screen">
-
       <Header />
 
       <div className="max-w-6xl mx-auto p-6">
+        <div className="grid md:grid-cols-2 gap-10 items-start">
+          <div className="w-full max-w-md">
+            {product.image ? (
+              <div className="relative">
+                <img
+                  src={product.image}
+                  className="w-full max-w-lg h-[420px] object-cover rounded-xl border"
+                />
 
-     <div className="grid md:grid-cols-2 gap-10 items-start">
-        <div className="w-full max-w-md">
-
-   {product.image ? (
-
-<div className="relative">
-
-  <img
-    src={product.image}
-    className="w-full max-w-lg h-[420px] object-cover rounded-xl border"
-  />
-
-  {product.isSold && (
-    <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded">
-      SOLD
-    </div>
-  )}
-
-</div>
-
-) : (
-
-  <div className="
+                {product.isSold && (
+                  <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded">
+                    SOLD
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div
+                className="
     bg-gray-100
     w-full
     max-w-lg
@@ -117,57 +111,63 @@ const handleChat = async () => {
     items-center
     justify-center
     rounded-xl
-  ">
-    No Image
-  </div>
+  "
+              >
+                No Image
+              </div>
+            )}
+          </div>
 
-)}
-</div>
+          <div className="flex flex-col gap-3">
+            <h1 className="text-3xl font-bold">{product.name}</h1>
 
+            <Link href={`/store/${product.storeId}`}>
+              <p className="text-sm text-blue-500 cursor-pointer hover:underline">
+                Kunjungi Toko
+              </p>
+            </Link>
 
-        <div className="flex flex-col gap-3">
+            <p className="text-xl font-semibold">
+              {new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+              }).format(product.price)}
+            </p>
 
-  <h1 className="text-3xl font-bold">
-    {product.name}
-  </h1>
+            <p className="text-gray-600">{product.description}</p>
 
-  <Link href={`/store/${product.storeId}`}>
-    <p className="text-sm text-blue-500 cursor-pointer hover:underline">
-      Kunjungi Toko
-    </p>
-  </Link>
+            {!isOwner && (
+              <button
+                onClick={handleChat}
+                style={{ backgroundColor: "black", color: "white" }}
+                className="mt-6 px-6 py-3 rounded-lg shadow-md"
+              >
+                Chat Seller
+              </button>
+            )}
 
-  <p className="text-xl font-semibold">
-    Rp {product.price}
-  </p>
-
-  <p className="text-gray-600">
-    {product.description}
-  </p>
-
- <button
-  onClick={handleChat}
-  style={{ backgroundColor: "black", color: "white" }}
-  className="mt-6 px-6 py-3 rounded-lg shadow-md"
->
-  Chat Seller
-</button>
-{isOwner && !product.isSold && (
-  <button
-    onClick={markAsSold}
-    style={{ backgroundColor: "#dc2626", color: "white" }}
-    className="mt-3 px-6 py-3 rounded-lg shadow-md"
-  >
-    Tandai Terjual
-  </button>
-)}
-
-</div>
-
+            {isOwner && !product.isSold && (
+              <button
+                onClick={() => markAsSoldorUnsold(true)}
+                style={{ backgroundColor: "#dc2626", color: "white" }}
+                className="mt-3 px-6 py-3 rounded-lg shadow-md"
+              >
+                Tandai Terjual
+              </button>
+            )}
+            {isOwner && product.isSold && (
+              <button
+                onClick={() => markAsSoldorUnsold(false)}
+                style={{ backgroundColor: "green", color: "white" }}
+                className="mt-3 px-6 py-3 rounded-lg shadow-md"
+              >
+                Batalkan Tandai Terjual
+              </button>
+            )}
+          </div>
         </div>
-
       </div>
-
     </main>
   )
 }

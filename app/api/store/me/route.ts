@@ -6,7 +6,6 @@ import { verifyToken } from "@/lib/auth"
 
 export async function GET(req: NextRequest) {
   try {
-
     const authHeader = req.headers.get("authorization")
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -26,12 +25,11 @@ export async function GET(req: NextRequest) {
       .where(eq(stores.ownerId, decoded.id))
       .limit(1)
 
-    if (!store.length) {
-      return NextResponse.json({ error: "Store not found" }, { status: 404 })
+    if (store.length < 1) {
+      return NextResponse.json(null)
     }
 
     return NextResponse.json(store[0])
-
   } catch (error) {
     console.error(error)
     return NextResponse.json({ error: "Failed" }, { status: 500 })
@@ -40,7 +38,6 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-
     const authHeader = req.headers.get("authorization")
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -64,12 +61,11 @@ export async function PATCH(req: NextRequest) {
         name,
         description,
         location,
-        ...(image && { image }) // 🔥 hanya update kalau ada
+        ...(image && { image }), // 🔥 hanya update kalau ada
       })
       .where(eq(stores.ownerId, decoded.id))
 
     return NextResponse.json({ message: "Updated" })
-
   } catch (error) {
     console.error(error)
     return NextResponse.json({ error: "Failed" }, { status: 500 })

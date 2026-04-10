@@ -3,24 +3,26 @@
 import Link from "next/link"
 import { useState } from "react"
 import { Button } from "../ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
 import SignupPage from "./Signup"
 import { LoginForm } from "./fragments/LoginForm"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 
 export function Header() {
+  const router = useRouter()
   const { data: user } = useCurrentUser()
   const [isLogin, setIsLogin] = useState(true)
 
+  const [open, setOpen] = useState(false)
+
+  const queryClient = useQueryClient()
+
   return (
     <header className="border-b">
-    <div className="
+      <div
+        className="
 container
 max-w-7xl
 mx-auto
@@ -30,62 +32,65 @@ py-4
 flex
 items-center
 justify-between
-">
-
+"
+      >
         {/* Logo */}
-        <span className="font-bold text-xl">LangkaLoka</span>
-{/* Right side */}
-<div className="flex items-center gap-4">
+        <button
+          className="font-bold text-xl cursor-pointer"
+          onClick={() => router.push("/")}
+        >
+          LangkaLoka
+        </button>
+        {/* Right side */}
+        <div className="flex items-center gap-4">
+          {user && (
+            <button
+              onClick={() => router.push(`/store-panel`)}
+              className="px-4 py-2 bg-gray-800 text-white rounded-lg"
+            >
+              Jualan Yuk!
+            </button>
+          )}
 
-  {user && (
-  <button
-    onClick={() => window.location.href = "/store-panel"}
-    className="px-4 py-2 bg-gray-800 text-white rounded-lg"
-  >
-    Seller Panel
-  </button>
-)}
+          {/* Wishlist */}
+          {user && (
+            <Link href="/wishlist">
+              <Button variant="outline">❤️ Wishlist</Button>
+            </Link>
+          )}
+          {user && (
+            <Link href="/chat">
+              <Button>Chat</Button>
+            </Link>
+          )}
+          {/* Login Dialog */}
+          <Dialog
+            open={open}
+            onOpenChange={(val) => {
+              setOpen(val)
+              if (!val) setIsLogin(true)
+            }}
+          >
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="font-medium">Hi {user.email}</span>
 
-  {/* Wishlist */}
-  {user && (
-    <Link href="/wishlist">
-      <Button variant="outline">
-        ❤️ Wishlist
-      </Button>
-    </Link>
-  )}
-  {user && (
-  <Link href="/chat">
-    <Button>Chat</Button>
-  </Link>
-)}
-  {/* Login Dialog */}
-  <Dialog>
-
-    <DialogTrigger asChild>
-      {user ? (
-        <div className="flex items-center gap-3">
-          <span className="font-medium">
-            Hi {user.email}
-          </span>
-
-         <Button
-  variant="outline"
-  onClick={() => {
-    localStorage.removeItem("token")
-    window.location.href = "/"
-  }}
->
-  Logout
-</Button>
-        </div>
-      ) : (
-        <Button>Login</Button>
-      )}
-    </DialogTrigger>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    localStorage.removeItem("token")
+                    queryClient.invalidateQueries({ queryKey: ["currentUser"] })
+                    router.push("/")
+                  }}
+                >
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={() => setOpen(true)}>Login</Button>
+            )}
 
             <DialogContent className="sm:max-w-md">
-
               <DialogHeader>
                 <DialogTitle>
                   {isLogin ? "Login" : "Create Account"}
@@ -94,7 +99,7 @@ justify-between
 
               {isLogin ? (
                 <>
-                  <LoginForm />
+                  <LoginForm onSuccess={() => setOpen(false)} />
 
                   <p className="text-sm text-center text-muted-foreground">
                     Don&apos;t have an account?{" "}
@@ -112,25 +117,11 @@ justify-between
                     onSuccess={() => setIsLogin(true)}
                     onSwitchToLogin={() => setIsLogin(true)}
                   />
-
-                  <p className="text-sm text-center text-muted-foreground">
-                    Already have an account?{" "}
-                    <span
-                      onClick={() => setIsLogin(true)}
-                      className="text-primary cursor-pointer hover:underline"
-                    >
-                      Login
-                    </span>
-                  </p>
                 </>
               )}
-
             </DialogContent>
-
           </Dialog>
-
         </div>
-
       </div>
     </header>
   )

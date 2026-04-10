@@ -13,54 +13,45 @@ type Product = {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault()
 
- const toggleFavorite = async (e: React.MouseEvent) => {
+    const token = localStorage.getItem("token")
 
-  e.preventDefault()
-
-  const token = localStorage.getItem("token")
-
-  if (!token) {
-    alert("Login dulu")
-    return
-  }
-
-  try {
-
-    await axios.post(
-      "/api/favorites",
-      { productId: product.id },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    )
-
-    alert("Added ❤️")
-
-  } catch (error: any) {
-
-    // kalau sudah ada → kita remove
-    if (error?.response?.data?.message === "Already in favorites") {
-
-      await axios.delete(`/api/favorites/${product.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-
-      alert("Removed ❌")
-
-    } else {
-      console.error(error)
+    if (!token) {
+      alert("Login dulu")
+      return
     }
 
+    try {
+      await axios.post(
+        "/api/favorites",
+        { productId: product.id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      alert("Added ❤️")
+    } catch (error: any) {
+      // kalau sudah ada → kita remove
+      if (error?.response?.data?.message === "Already in favorites") {
+        await axios.delete(`/api/favorites/${product.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        alert("Removed ❌")
+      } else {
+        console.error(error)
+      }
+    }
   }
-}
   return (
     <Link href={`/product/${product.id}`}>
-
       <div
         className="
         relative
@@ -75,11 +66,10 @@ export default function ProductCard({ product }: { product: Product }) {
         cursor-pointer
       "
       >
-
         {/* FAVORITE BUTTON */}
-       <button
-  onClick={toggleFavorite}
-  className="
+        <button
+          onClick={toggleFavorite}
+          className="
     absolute
     top-2
     right-2
@@ -90,13 +80,12 @@ export default function ProductCard({ product }: { product: Product }) {
     hover:scale-110
     transition
   "
->
-  ❤️
-</button>
+        >
+          ❤️
+        </button>
 
         {/* IMAGE */}
         {product.image ? (
-
           <img
             src={product.image}
             className="
@@ -105,9 +94,7 @@ export default function ProductCard({ product }: { product: Product }) {
               object-cover
             "
           />
-
         ) : (
-
           <div
             className="
             bg-gray-100
@@ -121,30 +108,25 @@ export default function ProductCard({ product }: { product: Product }) {
           >
             No Image
           </div>
-
         )}
 
         {/* CONTENT */}
         <div className="p-3 flex flex-col gap-1">
-
-          <h2 className="text-sm font-medium line-clamp-1">
-            {product.name}
-          </h2>
+          <h2 className="text-sm font-medium line-clamp-1">{product.name}</h2>
 
           <p className="text-base font-bold">
-            Rp {product.price.toLocaleString()}
+            {new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+              minimumFractionDigits: 0,
+            }).format(product.price)}
           </p>
 
           {product.condition && (
-            <p className="text-xs text-gray-500">
-              {product.condition}
-            </p>
+            <p className="text-xs text-gray-500">{product.condition}</p>
           )}
-
         </div>
-
       </div>
-
     </Link>
   )
 }

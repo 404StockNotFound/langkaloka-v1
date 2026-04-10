@@ -2,51 +2,41 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  LayoutDashboard,
-  Package,
-  PlusCircle,
-  Settings
-} from "lucide-react"
+import { LayoutDashboard, Package, PlusCircle, Settings } from "lucide-react"
 
 const menus = [
-    {
-  name: "Setting Toko",
-  href: "/store-panel/settings",
-  icon: Settings
-},
   {
     name: "Dashboard",
     href: "/store-panel",
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
   },
+  {
+    name: "Toko",
+    href: "/store-panel/settings",
+    icon: Settings,
+  },
+
   {
     name: "Produk Saya",
     href: "/store-panel/products",
-    icon: Package
+    icon: Package,
   },
   {
     name: "Tambah Produk",
-    href: "/sell",
-    icon: PlusCircle
-  }
+    href: "/store-panel/sell",
+    icon: PlusCircle,
+  },
 ]
 
 export default function Sidebar() {
-
   const pathname = usePathname()
 
   return (
     <aside className="w-64 border-r min-h-screen p-4">
-
-      <h2 className="font-bold text-lg mb-6">
-        Seller Panel
-      </h2>
+      <h2 className="font-bold text-lg mb-6">Halaman Penjual</h2>
 
       <div className="flex flex-col gap-2">
-
         {menus.map((menu) => {
-
           const isActive = pathname === menu.href
 
           const Icon = menu.icon
@@ -57,10 +47,7 @@ export default function Sidebar() {
               href={menu.href}
               className={`
                 flex items-center gap-3 px-3 py-2 rounded-lg transition
-                ${isActive 
-                  ? "bg-black text-white" 
-                  : "hover:bg-gray-100"
-                }
+                ${isActive ? "bg-black text-white" : "hover:bg-gray-100"}
               `}
             >
               <Icon size={18} />
@@ -68,9 +55,7 @@ export default function Sidebar() {
             </Link>
           )
         })}
-
       </div>
-
     </aside>
   )
 }
