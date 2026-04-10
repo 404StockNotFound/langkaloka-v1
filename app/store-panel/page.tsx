@@ -49,6 +49,29 @@ export default function StorePanelPage() {
       console.error(error)
     }
   }
+  const deleteProduct = async (id: string) => {
+  const confirmDelete = confirm("Yakin mau hapus produk ini?")
+
+  if (!confirmDelete) return
+
+  try {
+
+    const token = localStorage.getItem("token")
+
+    await axios.delete(`/api/products/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    alert("Produk berhasil dihapus")
+
+    fetchProducts()
+
+  } catch (error) {
+    console.error(error)
+  }
+}
 
   return (
     <main className="min-h-screen">
@@ -85,18 +108,26 @@ export default function StorePanelPage() {
                 Rp {product.price}
               </p>
 
-              {product.isSold ? (
-                <p className="text-red-500 mt-2 font-bold">
-                  SOLD
-                </p>
-              ) : (
-                <button
-                  onClick={() => markAsSold(product.id)}
-                  className="mt-2 bg-red-600 text-white px-3 py-1 rounded"
-                >
-                  Tandai Sold
-                </button>
-              )}
+           {product.isSold ? (
+  <p className="text-red-500 mt-2 font-bold">
+    SOLD
+  </p>
+) : (
+  <button
+    onClick={() => markAsSold(product.id)}
+    className="mt-2 bg-red-600 text-white px-3 py-1 rounded"
+  >
+    Tandai Sold
+  </button>
+)}
+
+{/* 🔥 DELETE BUTTON */}
+<button
+  onClick={() => deleteProduct(product.id)}
+  className="mt-2 bg-gray-800 text-white px-3 py-1 rounded"
+>
+  Delete
+</button>
 
             </div>
           ))}
