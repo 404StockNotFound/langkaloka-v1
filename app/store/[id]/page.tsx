@@ -4,17 +4,84 @@ import { useParams } from "next/navigation"
 import { useStore } from "@/hooks/useStore"
 import { Header } from "@/components/views/Header"
 import ProductCard from "@/components/products/ProductCard"
+import { useState, useEffect } from "react"
 
 export default function StorePage() {
 
   const params = useParams()
   const id = params.id as string
 
-  const { data, isLoading } = useStore(id)
+  const { data, isLoading, refetch } = useStore(id)
+
+  const [selectedRating, setSelectedRating] = useState(0)
+  const [hasRated, setHasRated] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  // 🔥 LOAD RATING DARI DB (AUTO PERSIST)
+  useEffect(() => {
+    if (data?.userRating) {
+      setSelectedRating(Number(data.userRating))
+      setHasRated(true)
+    }
+  }, [data])
 
   if (isLoading) return <p>Loading...</p>
-
   if (!data) return <p>Store not found</p>
+
+  // 🔥 HANDLE RATE
+  const handleRate = async (star: number) => {
+
+    // 🔒 BLOCK kalau sudah rating
+    if (hasRated) {
+      alert("Kamu sudah memberi rating ⭐")
+      return
+    }
+
+    const token = localStorage.getItem("token")
+
+    if (!token) {
+      alert("Login dulu ya 🔐")
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const res = await fetch("/api/store/rate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          storeId: data.store.id,
+          rating: star
+        })
+      })
+
+      const result = await res.json()
+
+      if (!res.ok) {
+        alert(result.error)
+        return
+      }
+
+      // 🔥 UPDATE UI + LOCK
+      setSelectedRating(star)
+      setHasRated(true)
+
+      // 🔥 REFRESH AVG RATING
+      await refetch()
+
+      alert(`⭐ Terima kasih sudah memberi ${star} bintang!`)
+
+    } catch (error) {
+      console.error(error)
+      alert("Gagal rating")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <main className="min-h-screen">
@@ -23,45 +90,125 @@ export default function StorePage() {
 
       <div className="max-w-6xl mx-auto p-6">
 
-     {/* STORE INFO */}
-<div className="flex items-center gap-4 mb-8">
+        {/* STORE INFO */}
+        <div className="flex items-start gap-4 mb-8">
 
-  {/* 🔥 FOTO TOKO */}
-  {data.store.image ? (
-    <img
-      src={data.store.image}
-      className="w-20 h-20 rounded-full object-cover border shadow"
-    />
-  ) : (
-    <div className="w-20 h-20 bg-gray-200 rounded-full" />
-  )}
+          {/* FOTO */}
+          {data.store.image ? (
+            <img
+              src={data.store.image}
+              className="w-20 h-20 rounded-full object-cover border shadow"
+            />
+          ) : (
+            <div className="w-20 h-20 bg-gray-200 rounded-full" />
+          )}
 
-  {/* 🔥 INFO TOKO */}
-  <div>
+          {/* INFO */}
+          <div>
 
-    <h1 className="text-3xl font-bold">
-      {data.store.name}
-    </h1>
+            <h1 className="text-3xl font-bold">
+              {data.store.name}
+            </h1>
 
-    <p className="text-gray-500">
-      {data.store.description}
+            {/* ⭐ AVG */}
+            <div className="mt-2">
+
+  {/* ⭐ AVG */}
+  <div className="flex items-center gap-2">
+    <p className="text-yellow-500 text-lg font-bold">
+      ⭐ {Number(data.avgRating || 0).toFixed(1)}
     </p>
-
-    <p className="text-sm text-gray-400 mt-1">
-      📍 {data.store.location || "Lokasi belum diisi"}
+    <p className="text-sm text-gray-400">
+      / 5
     </p>
+  </div>
+
+  {/* TOTAL */}
+  <p className="text-xs text-gray-400">
+    {data.totalRatings} penilaian
+  </p>
+
+  {/* 🔥 BREAKDOWN */}
+  <div className="mt-3 w-64 flex flex-col gap-1">
+
+    {[5,4,3,2,1].map((star) => {
+
+      const percent = data.ratingPercentages?.[star] || 0
+
+      return (
+        <div key={star} className="flex items-center gap-2 text-xs">
+
+          {/* STAR */}
+          <span className="w-6 text-gray-600">
+            {star}⭐
+          </span>
+
+          {/* BAR */}
+          <div className="flex-1 bg-gray-200 h-2 rounded overflow-hidden">
+            <div
+              className="bg-yellow-400 h-2 transition-all"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+
+          {/* PERCENT */}
+          <span className="w-10 text-right text-gray-500">
+            {percent.toFixed(0)}%
+          </span>
+
+        </div>
+      )
+    })}
 
   </div>
 
 </div>
 
+            <p className="text-gray-500">
+              {data.store.description}
+            </p>
+
+            {/* ⭐ RATING */}
+            <div className="flex gap-1 mt-3">
+
+              {[1,2,3,4,5].map((star) => (
+                <button
+                  key={star}
+                  disabled={loading || hasRated}
+                  onClick={() => handleRate(star)}
+                  className={`
+                    text-2xl transition
+                    ${star <= selectedRating ? "text-yellow-500" : "text-gray-300"}
+                    ${hasRated ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
+                  `}
+                >
+                  ★
+                </button>
+              ))}
+
+            </div>
+
+            {/* 🔥 STATUS */}
+            {hasRated && (
+              <p className="text-xs text-green-600 mt-1">
+                ✔ Kamu sudah memberi rating
+              </p>
+            )}
+
+            {/* 📍 LOKASI */}
+            <p className="text-sm text-gray-400 mt-2">
+              📍 {data.store.location || "Lokasi belum diisi"}
+            </p>
+
+          </div>
+
+        </div>
+
         {/* PRODUCTS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-
           {data.products.map((product: any) => (
             <ProductCard key={product.id} product={product} />
           ))}
-
         </div>
 
       </div>

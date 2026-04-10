@@ -21,7 +21,7 @@ export const users = pgTable("users", {
 // STORES
 export const stores = pgTable("stores", {
   id: uuid("id").primaryKey().defaultRandom(),
-  
+
   ownerId: uuid("owner_id").notNull(),
 
   name: text("name").notNull(),
@@ -113,4 +113,15 @@ export const messages = pgTable("messages", {
   text: text("text").notNull(),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+export const storeRatings = pgTable("store_ratings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+
+  storeId: uuid("store_id").notNull(),
+  userId: uuid("user_id").notNull(),
+
+  rating: integer("rating").notNull(), // 1 - 5
+
+  createdAt: timestamp("created_at").defaultNow()
 })
