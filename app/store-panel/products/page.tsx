@@ -45,7 +45,7 @@ export default function SellerProductsPage() {
   }
 
   const deleteProduct = async (id: string) => {
-    if (!confirm("Yakin mau hapus?")) return
+    if (!confirm("Yakin mau hapus produk ini?")) return
 
     try {
       const token = localStorage.getItem("token")
@@ -72,48 +72,110 @@ export default function SellerProductsPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
 
         {products.map((product) => (
-          <div key={product.id} className="border rounded-lg p-3">
 
-            {product.image ? (
-              <img
-                src={product.image}
-                className="w-full h-40 object-cover rounded"
-              />
-            ) : (
-              <div className="h-40 bg-gray-100 flex items-center justify-center">
-                No Image
-              </div>
-            )}
+          <div
+            key={product.id}
+            className="
+              border
+              rounded-xl
+              overflow-hidden
+              hover:shadow-lg
+              transition
+              bg-white
+            "
+          >
 
-            <p className="mt-2 font-semibold">
-              {product.name}
-            </p>
+            {/* IMAGE */}
+            <div className="relative">
 
-            <p className="text-sm">
-              Rp {product.price}
-            </p>
+              {product.image ? (
+                <img
+                  src={product.image}
+                  className="w-full h-40 object-cover"
+                />
+              ) : (
+                <div className="h-40 bg-gray-100 flex items-center justify-center">
+                  No Image
+                </div>
+              )}
 
-            {product.isSold ? (
-              <p className="text-red-500 mt-2 font-bold">
-                SOLD
+              {/* 🔥 SOLD BADGE */}
+              {product.isSold && (
+                <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
+                  SOLD
+                </div>
+              )}
+
+            </div>
+
+            {/* CONTENT */}
+            <div className="p-3 flex flex-col gap-2">
+
+              <p className="font-semibold text-sm line-clamp-1">
+                {product.name}
               </p>
-            ) : (
-              <button
-                onClick={() => markAsSold(product.id)}
-                className="mt-2 bg-red-600 text-white px-3 py-1 rounded"
-              >
-                Tandai Sold
-              </button>
-            )}
 
-            <button
-              onClick={() => deleteProduct(product.id)}
-              className="mt-2 bg-gray-800 text-white px-3 py-1 rounded"
-            >
-              Delete
-            </button>
+             <p className="font-bold text-sm">
+  Rp {product.price?.toLocaleString()}
+</p>
+
+{/* BUTTON AREA */}
+<div className="flex flex-col gap-2 mt-2">
+
+  {/* 🔥 EDIT */}
+  <button
+  onClick={() => window.location.href = `/store-panel/products/${product.id}/edit`}
+  className="
+    w-full
+    bg-blue-600
+    text-blue
+    py-2
+    rounded-md
+    text-sm
+    font-semibold
+    hover:bg-blue-700
+  "
+>
+  Edit
+</button>
+
+  {/* 🔥 SOLD */}
+  {!product.isSold && (
+    <button
+      onClick={() => markAsSold(product.id)}
+      className="
+        bg-red-600
+        text-white
+        py-1.5
+        rounded-md
+        text-sm
+        hover:bg-red-700
+      "
+    >
+      Tandai Terjual
+    </button>
+  )}
+
+  {/* 🔥 DELETE */}
+  <button
+    onClick={() => deleteProduct(product.id)}
+    className="
+      bg-gray-800
+      text-white
+      py-1.5
+      rounded-md
+      text-sm
+      hover:bg-black
+    "
+  >
+    Hapus
+  </button>
+
+</div>
+            </div>
 
           </div>
+
         ))}
 
       </div>
