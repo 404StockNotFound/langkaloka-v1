@@ -21,19 +21,16 @@ export function Header() {
 
   const queryClient = useQueryClient()
 
-  // 🔥 audio instance (FIX UTAMA)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-
-  // 🔥 anti duplicate notif
   const lastEventRef = useRef<string | null>(null)
 
-  // ✅ INIT AUDIO SEKALI
+  // 🔥 INIT AUDIO
   useEffect(() => {
     audioRef.current = new Audio("/notif.mp3")
     audioRef.current.volume = 0.5
   }, [])
 
-  // ✅ UNLOCK AUDIO (WAJIB BIAR BISA BUNYI)
+  // 🔥 UNLOCK AUDIO
   useEffect(() => {
     const unlock = () => {
       if (audioRef.current) {
@@ -43,13 +40,32 @@ export function Header() {
     }
 
     document.addEventListener("click", unlock, { once: true })
-
-    return () => {
-      document.removeEventListener("click", unlock)
-    }
+    return () => document.removeEventListener("click", unlock)
   }, [])
 
-  // 🔥 PUSHER LISTENER
+  // 🟢 ONLINE PING
+  useEffect(() => {
+    if (!user) return
+
+    const token = localStorage.getItem("token")
+    if (!token) return
+
+    const sendPing = () => {
+      fetch("/api/user/online", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    }
+
+    sendPing()
+    const interval = setInterval(sendPing, 10000)
+
+    return () => clearInterval(interval)
+  }, [user])
+
+  // 🔥 PUSHER
   useEffect(() => {
     if (!user) return
 
@@ -62,32 +78,23 @@ export function Header() {
     channel.bind("update", (data: any) => {
       const myId = localStorage.getItem("userId")
 
-      // ❌ skip diri sendiri
       if (data.senderId === myId) return
-
-      // ❌ skip bukan message
       if (!data.text) return
 
-      // ❌ skip kalau lagi di chat itu
       const currentChatId = window.location.pathname.split("/chat/")[1]
       if (currentChatId === data.chatId) return
 
-      // ❌ skip duplicate
       const eventKey = `${data.chatId}-${data.text}`
       if (lastEventRef.current === eventKey) return
 
       lastEventRef.current = eventKey
 
-      // ✅ tambah notif
       setNotif((prev) => prev + 1)
 
-      // 🔥 PLAY SOUND (FIX FINAL)
       if (audioRef.current) {
-        audioRef.current.currentTime = 0 // 🔥 biar bisa spam
+        audioRef.current.currentTime = 0
         audioRef.current.muted = false
-        audioRef.current.play().catch((e) => {
-          console.log("AUDIO ERROR:", e)
-        })
+        audioRef.current.play().catch(() => {})
       }
     })
 
@@ -109,7 +116,6 @@ export function Header() {
           LangkaLoka
         </button>
 
-        {/* RIGHT */}
         <div className="flex items-center gap-4">
 
           {isLoading ? (
@@ -131,7 +137,6 @@ export function Header() {
                 </Link>
               )}
 
-              {/* CHAT */}
               {user && (
                 <div className="relative">
                   <button
@@ -152,14 +157,8 @@ export function Header() {
                 </div>
               )}
 
-              {/* LOGIN */}
-              <Dialog
-                open={open}
-                onOpenChange={(val) => {
-                  setOpen(val)
-                  if (!val) setIsLogin(true)
-                }}
-              >
+              {/* 🔐 LOGIN */}
+              <Dialog open={open} onOpenChange={setOpen}>
                 {user ? (
                   <div className="flex items-center gap-3">
                     <span className="font-medium">Hi {user.email}</span>
@@ -184,6 +183,7 @@ export function Header() {
                   <Button onClick={() => setOpen(true)}>Login</Button>
                 )}
 
+                {/* 🔥 INI YANG TADI HILANG */}
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle>
@@ -213,6 +213,7 @@ export function Header() {
                   )}
                 </DialogContent>
               </Dialog>
+
             </>
           )}
 
