@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/db/client"
 import { messages } from "@/db/schema"
-import { eq, and, isNull } from "drizzle-orm"
+import { eq, and, isNull, ne } from "drizzle-orm"
 import { verifyToken } from "@/lib/auth"
 import { pusher } from "@/lib/pusher"
 
@@ -10,7 +10,6 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-
     const { id } = await context.params
 
     const authHeader = req.headers.get("authorization")
@@ -21,21 +20,42 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // 🔥 UPDATE SEMUA MESSAGE JADI READ
+    // ✅ FIX: HANYA MESSAGE DARI LAWAN
+    const unreadMessages = await db
+      .select()
+      .from(messages)
+      .where(
+        and(
+          eq(messages.chatId, id),
+          isNull(messages.readAt),
+          ne(messages.senderId, user.id) // 🔥 INI FIX NYA
+        )
+      )
+
+    if (unreadMessages.length === 0) {
+      return NextResponse.json({ ok: true })
+    }
+
+    // 🔥 update jadi read
     await db
       .update(messages)
       .set({ readAt: new Date() })
       .where(
         and(
           eq(messages.chatId, id),
-          isNull(messages.readAt)
+          isNull(messages.readAt),
+          ne(messages.senderId, user.id) // 🔥 WAJIB JUGA DI SINI
         )
       )
 
-    // 🔥 REALTIME UPDATE
-    await pusher.trigger(`chat-${id}`, "read", {
-      chatId: id
-    })
+    // 🔥 trigger realtime per message
+    for (const msg of unreadMessages) {
+      await pusher.trigger(`chat-${id}`, "read", {
+        messageId: msg.id,
+        readerId: user.id,
+        readAt: new Date()
+      })
+    }
 
     return NextResponse.json({ ok: true })
 
