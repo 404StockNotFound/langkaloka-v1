@@ -3,6 +3,8 @@ import { db } from "@/db/client"
 import { stores } from "@/db/schema"
 import { verifyToken } from "@/lib/auth"
 import cloudinary from "@/lib/cloudinary"
+import { eq } from "drizzle-orm"
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,18 +33,44 @@ export async function POST(req: NextRequest) {
       imageUrl = uploaded.secure_url
     }
 
-    const [store] = await db
-      .insert(stores)
-      .values({
-        name,
-        description,
-        location,
-        ownerId: decoded.id,
-        ...(imageUrl && { image: imageUrl }),
-      })
-      .returning()
+   const existingStore = await db.query.stores.findFirst({
+  where: (stores, { eq }) => eq(stores.ownerId, decoded.id),
+})
 
-    return NextResponse.json(store, { status: 201 })
+let store
+
+if (existingStore) {
+  // 🔥 UPDATE
+  const [updated] = await db
+    .update(stores)
+    .set({
+      name,
+      description,
+      location,
+      ...(imageUrl && { image: imageUrl }),
+    })
+    .where(eq(stores.ownerId, decoded.id))
+    .returning()
+
+  store = updated
+} else {
+  // 🔥 CREATE
+  const [created] = await db
+    .insert(stores)
+    .values({
+      name,
+      description,
+      location,
+      ownerId: decoded.id,
+      ...(imageUrl && { image: imageUrl }),
+    })
+    .returning()
+
+  store = created
+}
+
+return NextResponse.json(store, { status: 200 })
+
   } catch (error) {
     console.error(error)
     return NextResponse.json({ error: "Failed" }, { status: 500 })

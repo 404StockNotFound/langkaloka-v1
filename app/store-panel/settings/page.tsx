@@ -77,22 +77,25 @@ export default function StoreSettingsPage() {
 
       const imageBase64 = image ? await toBase64(image) : undefined
 
-      await axios.post(
-        "/api/store/create",
-        {
-          name,
-          description,
-          location,
-          image: imageBase64,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
+    await axios.post(
+  "/api/store/create",
+  {
+    name,
+    description,
+    location,
+    image: imageBase64,
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+)
 
-      alert("Toko berhasil dibuat")
+// 🔥 TAMBAH INI
+await fetchStore()
+
+      alert(hasStore ? "Toko berhasil diperbarui" : "Toko berhasil dibuat")
       router.push("/store-panel")
     } catch (error) {
       console.error(error)
@@ -127,27 +130,29 @@ export default function StoreSettingsPage() {
           placeholder="Lokasi"
         />
 
-        {hasStore ? (
-          <Image
-            src={me?.image ?? ("" as string)}
-            alt="Store Image"
-            width={200}
-            height={200}
-            unoptimized
-            priority
-          />
-        ) : (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files) {
-                setImage(e.target.files[0])
-              }
-            }}
-          />
-        )}
+   <div className="flex items-center gap-4">
+  {hasStore && me?.image && (
+    <Image
+      src={me.image}
+      alt="Store Image"
+      width={100}
+      height={100}
+      className="rounded object-cover border"
+      unoptimized
+    />
+  )}
 
+  <input
+    type="file"
+    accept="image/*"
+    className="text-sm"
+    onChange={(e) => {
+      if (e.target.files) {
+        setImage(e.target.files[0])
+      }
+    }}
+  />
+</div>
         <button className="bg-black text-white py-3 rounded">
           {hasStore ? "Perbarui" : "Buat"}
         </button>
