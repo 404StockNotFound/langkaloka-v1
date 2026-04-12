@@ -130,6 +130,14 @@ export function Header() {
                   Jualan Yuk!
                 </button>
               )}
+              {user && (
+  <button
+    onClick={() => router.push("/feedback")}
+    className="px-4 py-2 bg-white border border-black text-black rounded-lg hover:bg-black hover:text-white transition"
+  >
+    Feedback
+  </button>
+)}
 
               {user && (
                 <Link href="/wishlist">
